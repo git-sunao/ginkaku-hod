@@ -7,7 +7,7 @@ import time
 import json
 import os
 import argparse
-import tqdm
+from mpi4py import MPI
 here = os.path.dirname(os.path.abspath(__file__))
 
 class Sampler:
@@ -95,13 +95,24 @@ class Sampler:
         names_to_sample = json.load(open(fname_chain_post_equal.replace('post_equal_weights.dat', 'params.json')))
 
         print('The samples size: ', samples.shape[0])
-        samples_derived = []
-        for sample in tqdm.tqdm(samples):
-            wp, ng = self.get_prediction(sample, names_to_sample)
-            samples_derived.append(np.append(wp, ng))
 
-        output = fname_chain_post_equal.replace('.dat', '-derived_signal.dat')
-        np.savetxt(output, samples_derived)
+        # parallelize the computation
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+        sub_samples = samples[rank::size]
+
+        sub_samples_derived = []
+        for sample in sub_samples:
+            wp, ng = self.get_prediction(sample, names_to_sample)
+            sub_samples_derived.append(np.append(wp, ng))
+
+        # gather the results
+        samples_derived = comm.gather(sub_samples_derived, root=0)
+        if rank == 0:
+            samples_derived = np.concatenate(samples_derived)
+            output = fname_chain_post_equal.replace('.dat', '-derived_signal.dat')
+            np.savetxt(output, samples_derived)
 
         return samples_derived
             
@@ -133,8 +144,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('zbin', type=int, help='Redshift bin')
     parser.add_argument('output', type=str, help='Output file name')
+    parser.add_argument('--derived', action='store_true', help='Compute derived')
     args = parser.parse_args()
 
     sampler = Sampler(args.zbin)
     output = os.path.join(here, '../chains/{}-z{}-'.format(args.output, args.zbin))
-    sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha'], output)
+    # sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha'], output)
+
+    if args.derived:
+        sampler.derived_signal(output+'post_equal_weights.dat')
