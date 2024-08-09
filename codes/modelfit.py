@@ -171,5 +171,5 @@ if __name__ == '__main__':
 
     sampler = Sampler(args.zbin)
     output = os.path.join(here, '../chains/{}-z{}-'.format(args.output, args.zbin))
-    sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha', 'kappa'], output)
+    # sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha', 'kappa'], output)
     sampler.derived_predictions(output+'post_equal_weights.dat')
