@@ -96,7 +96,7 @@ class Sampler:
         names_to_sample = json.load(open(fname_chain_post_equal.replace('post_equal_weights.dat', 'params.json')))
         return samples, names_to_sample
 
-    def derived_signal(self, fname_chain_post_equal):
+    def derived_predictions(self, fname_chain_post_equal):
         samples, names_to_sample = self.load_chain(fname_chain_post_equal)
 
         print('The samples size: ', samples.shape[0])
@@ -107,21 +107,37 @@ class Sampler:
         size = comm.Get_size()
         sub_samples = samples[rank::size]
 
-        sub_samples_derived = []
+        sub_samples_sig = []
+        sub_samples_hod = []
         for sample in sub_samples:
+            # signal
             wp, ng = self.get_prediction(sample, names_to_sample)
-            sub_samples_derived.append(np.append(wp, ng))
+            sub_samples_sig.append(np.append(wp, ng))
+            # hod
+            Mh = self.models[0].Mh
+            Nc = self.models[0].Ncen
+            Ns = self.models[0].Nsat
+            sub_samples_hod.append(np.append(Nc, Ns))
 
         # gather the results
-        samples_derived = comm.gather(sub_samples_derived, root=0)
+        samples_sig = comm.gather(sub_samples_sig, root=0)
+        samples_hod = comm.gather(sub_samples_hod, root=0)
         if rank == 0:
-            samples_derived = np.concatenate(samples_derived)
+            # signal
+            samples_sig = np.concatenate(samples_sig)
             output = fname_chain_post_equal.replace('.dat', '-derived_signal.dat')
-            np.savetxt(output, samples_derived)
+            np.savetxt(output, samples_sig)
+            # hod
+            samples_hod = np.concatenate(samples_hod)
+            output = fname_chain_post_equal.replace('.dat', '-derived_hod.dat')
+            np.savetxt(output, samples_hod)
 
-        return samples_derived
-            
-
+    def get_bestfit_predictions(self, fname_chain_post_equal):
+        samples, names_to_sample = self.load_chain(fname_chain_post_equal)
+        sample_beftfit = samples[np.argmax(samples[:,-1]), :]
+        wp, ng = self.get_prediction(sample_beftfit, names_to_sample)
+        Mh, Nc, Ns = self.models[0].Mh, self.models[0].Ncen, self.models[0].Nsat
+        return wp, ng, Mh, Nc, Ns
 
 prior   =  {'logMmin': [12.0, 14.5], 
             'sigma_sq': [0.01, 1.0], 
@@ -153,5 +169,5 @@ if __name__ == '__main__':
 
     sampler = Sampler(args.zbin)
     output = os.path.join(here, '../chains/{}-z{}-'.format(args.output, args.zbin))
-    sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha', 'kappa'], output)
-    sampler.derived_signal(output+'post_equal_weights.dat')
+    # sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha', 'kappa'], output)
+    sampler.derived_predictions(output+'post_equal_weights.dat')
