@@ -13,6 +13,6 @@ Surhudのコードで測定したwpを使う。ngは宮武さんが昔測定し�
 これはBOSSのflux-limited sampleからluminosity cutを適用して作成したもの。
 
 ## model 
-最新のmodeling codeを使おう(大里さんによると、宮武さんが使っているコードにバグがあったらしいので...)。
+最新のmodeling codeを使おう(大里さんによると、宮武さんが使っているコードにバグがあったらしいので...(要確認))。
 hscs19a3x2pt-likellihoodから必要な部品を抽出。
 
