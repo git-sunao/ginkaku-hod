@@ -22,7 +22,8 @@ Surhudのコードで測定したwpを使う。ngは宮武さんが昔測定し�
 
 copy_data.shでコピーできる。
 
-## model 
-最新のmodeling codeを使おう(大里さんによると、宮武さんが使っているコードにバグがあったらしいので...(要確認))。
-hscs19a3x2pt-likellihoodから必要なmodulesを抽出。
+[!Note]
+測定はWMAP9を仮定している(see [More+ Section II.D.2](https://arxiv.org/pdf/2304.00703))ので、fittingの時にmeasurement correctionを入れる必要あり。
 
+## model 
+darkemulator + measurement correction module(hsc y3 likeより)を使う。
