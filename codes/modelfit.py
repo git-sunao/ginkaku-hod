@@ -11,7 +11,7 @@ from mpi4py import MPI
 here = os.path.dirname(os.path.abspath(__file__))
 
 class Sampler:
-    def __init__(self, zbin):
+    def __init__(self, zbin, use_model=True):
         # Read the data
         ng     = np.loadtxt(os.path.join(here,'../data/ng_sig_z{:03d}.dat'.format(zbin)))
         cov_ng = np.loadtxt(os.path.join(here,'../data/ng_cov_10p_z{:03d}_z{:03d}.dat'.format(zbin, zbin)))
@@ -21,8 +21,9 @@ class Sampler:
         zl_rep = [0.26, 0.51, 0.63][zbin]
         pimax  = 100.0
         dlnR   = np.log(rp[1]/rp[0])
-        self.data = ng, cov_ng, rp, wp, icov_wp, zl_rep, pimax, dlnR
+        self.data = ng, cov_ng, rp, wp, cov_wp, icov_wp, zl_rep, pimax, dlnR
 
+        if not use_model: return None
         # Instantiate the objects
         ## HOD model
         hod = model_hod.darkemu_x_hod()
@@ -36,7 +37,7 @@ class Sampler:
 
     def sample_with_multinest(self, prior, names_to_sample, output):
         # unpack the data
-        ng, cov_ng, rp, wp, icov_wp, zl_rep, pimax, dlnR = self.data
+        ng, cov_ng, rp, wp, cov_wp, icov_wp, zl_rep, pimax, dlnR = self.data
 
         def mn_prior(cube, ndims, nparams):
             for i, name in enumerate(names_to_sample):
@@ -70,7 +71,7 @@ class Sampler:
 
     def get_prediction(self, params, names):
         # unpack the data
-        ng, cov_ng, rp, wp, icov_wp, zl_rep, pimax, dlnR = self.data
+        ng, cov_ng, rp, wp, cov_wp, icov_wp, zl_rep, pimax, dlnR = self.data
 
         # models
         hod, mc = self.models
@@ -90,9 +91,13 @@ class Sampler:
 
         return wp_pred, ng_pred
 
-    def derived_signal(self, fname_chain_post_equal):
+    def load_chain(self, fname_chain_post_equal):
         samples = np.loadtxt(fname_chain_post_equal)
         names_to_sample = json.load(open(fname_chain_post_equal.replace('post_equal_weights.dat', 'params.json')))
+        return samples, names_to_sample
+
+    def derived_signal(self, fname_chain_post_equal):
+        samples, names_to_sample = self.load_chain(fname_chain_post_equal)
 
         print('The samples size: ', samples.shape[0])
 
@@ -148,5 +153,5 @@ if __name__ == '__main__':
 
     sampler = Sampler(args.zbin)
     output = os.path.join(here, '../chains/{}-z{}-'.format(args.output, args.zbin))
-    # sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha'], output)
+    sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha', 'kappa'], output)
     sampler.derived_signal(output+'post_equal_weights.dat')
