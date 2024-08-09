@@ -6,6 +6,7 @@ import pymultinest
 import time
 import json
 import os
+import argparse
 here = os.path.dirname(os.path.abspath(__file__))
 
 def run_fitting(zbin, prior, names_to_sample, output):
@@ -92,5 +93,11 @@ gparam_fiducial={"logMmin": 13.13,
                 "alpha_inc": 0.44, 
                 "logM_inc": 13.57} # incompleteness parameters. For details, see More et al. (2015)
 
-output = os.path.join(here, '../chains/test-')
-run_fitting(0, prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha'], output)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('zbin', type=int, help='Redshift bin')
+    parser.add_argument('output', type=str, help='Output file name')
+    args = parser.parse_args()
+
+    output = os.path.join(here, '../chains/{}-z{}-'.format(args.output, args.zbin))
+    run_fitting(args.zbin, prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha'], output)
