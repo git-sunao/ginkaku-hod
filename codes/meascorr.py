@@ -197,10 +197,12 @@ class wp_meascorr_class:
         return self.get_pimax_corr_r_corr(zl_rep, Om, wde)
 
     # number density correction factor
-    def get_ng_corr(self, zl_rep, Om, wde):
+    def get_ng_corr(self, zl_rep):
         """
         This is multiplied to theory.
         """
+        param = self.current_param
+        Om, wde = param['Om'], param['wde']
         cosmo = self.get_cosmo(Om, wde)
         c = 1.0
         c*= (cosmo.comoving_distance(zl_rep).value/self.cosmo_meas.comoving_distance(zl_rep).value)**2
