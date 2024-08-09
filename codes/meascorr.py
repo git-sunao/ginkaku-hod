@@ -184,7 +184,7 @@ class wp_meascorr_class:
         """
         cosmo   = self.get_cosmo(Om, wde)
         pimax_corr = cosmo.inv_efunc(zl_rep)/self.cosmo_meas.inv_efunc(zl_rep) # pi = c*Delta z/ H_0*E(z), pimax is proportional to **inverse** of E(z).
-        r_corr  = cosmo.comoving_distance(zl_rep).value/self.cosmo_meas.comoving_distance(zl_rep).value        
+        r_corr  = cosmo.comoving_distance(zl_rep).value/self.cosmo_meas.comoving_distance(zl_rep).value
         return pimax_corr, r_corr
     
     # useful for likelihood
@@ -195,4 +195,14 @@ class wp_meascorr_class:
         param = self.current_param
         Om, wde = param['Om'], param['wde']
         return self.get_pimax_corr_r_corr(zl_rep, Om, wde)
-    
+
+    # number density correction factor
+    def get_ng_corr(self, zl_rep, Om, wde):
+        """
+        This is multiplied to theory.
+        """
+        cosmo = self.get_cosmo(Om, wde)
+        c = 1.0
+        c*= (cosmo.comoving_distance(zl_rep).value/self.cosmo_meas.comoving_distance(zl_rep).value)**2
+        c*= cosmo.inv_efunc(zl_rep)/self.cosmo_meas.inv_efunc(zl_rep)
+        return c

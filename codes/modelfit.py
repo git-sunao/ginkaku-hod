@@ -86,8 +86,9 @@ class Sampler:
 
         # get model prediction
         f_pimax, f_rp = mc.get_corrs(zl_rep)
-        wp_pred = hod.get_wp(f_rp*rp, zl_rep, pimax=pimax, rsd=True, dlnrp=dlnR) # Mpc/h
-        ng_pred = hod.get_ng(zl_rep) # (Mpc/h)^-3
+        wp_pred = hod.get_wp(f_rp*rp, zl_rep, pimax=pimax*f_pimax, rsd=True, dlnrp=dlnR) # Mpc/h
+        f_ng = mc.get_ng_corr(zl_rep)
+        ng_pred = f_ng * hod.get_ng(zl_rep) # (Mpc/h)^-3
 
         return wp_pred, ng_pred
 
