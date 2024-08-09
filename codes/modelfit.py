@@ -131,6 +131,8 @@ class Sampler:
             samples_hod = np.concatenate(samples_hod)
             output = fname_chain_post_equal.replace('.dat', '-derived_hod.dat')
             np.savetxt(output, samples_hod)
+            # halo mass bins
+            np.savetxt(fname_chain_post_equal.replace('.dat', '-Mh.dat'), Mh)
 
     def get_bestfit_predictions(self, fname_chain_post_equal):
         samples, names_to_sample = self.load_chain(fname_chain_post_equal)
