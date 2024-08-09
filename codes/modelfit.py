@@ -144,12 +144,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('zbin', type=int, help='Redshift bin')
     parser.add_argument('output', type=str, help='Output file name')
-    parser.add_argument('--derived', action='store_true', help='Compute derived')
     args = parser.parse_args()
 
     sampler = Sampler(args.zbin)
     output = os.path.join(here, '../chains/{}-z{}-'.format(args.output, args.zbin))
     # sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha'], output)
-
-    if args.derived:
-        sampler.derived_signal(output+'post_equal_weights.dat')
+    sampler.derived_signal(output+'post_equal_weights.dat')
