@@ -169,6 +169,11 @@ class Sampler:
         Mh, Nc, Ns = self.models[0].Mh, self.models[0].Ncen, self.models[0].Nsat
         return wp, ng, Mh, Nc, Ns
 
+    def get_bestfit(self, fname_chain_post_equal):
+        samples, names_to_sample = self.load_chain(fname_chain_post_equal)
+        sample_beftfit = samples[np.argmax(samples[:,-1]), :]
+        return sample_bestfit, names_to_sample
+
 prior   =  {'logMmin': [12.0, 14.5], 
             'sigma_sq': [0.01, 1.0], 
             'logM1':[12.0, 16.0], 
