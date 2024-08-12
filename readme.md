@@ -30,14 +30,16 @@ darkemulator + measurement correction module(hsc y3 likeより)を使う。
 
 これに加えてabundanceにもmeasurement correctionを入れる必要あり。
 視線方向と視線と垂直方向の距離を$\pi$, $r_{\rm p}$とする。これはcosmology dependent。観測結果固定で
+
 $$
 n_{\rm g}r_{\rm p}{\rm d}r_{\rm p}{\rm d}\pi \propto n_{\rm g}\frac{\chi^2}{E} = {\rm const}
 $$
+
 なので宇宙論を変えると
+
 $$
-n_{\rm g}(\mathcal{C}_{\rm meas}) 
-=
-n_{\rm g}(\mathcal{C})
-\frac{\chi^2(\mathcal{C})}{\chi^2(\mathcal{C}_{\rm meas})} 
-\frac{E(\mathcal{C}_{\rm meas})}{E(\mathcal{C})}
+n_{\rm g}(C_{\rm meas}) = 
+n_{\rm g}(C)
+\frac{ \chi^2(C) }{ \chi^2( C_{\rm meas}) } 
+\frac{ E(C_{\rm meas}) }{ E(C) }
 $$
