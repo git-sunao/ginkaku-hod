@@ -10,6 +10,32 @@ import argparse
 from mpi4py import MPI
 here = os.path.dirname(os.path.abspath(__file__))
 
+# Planck2018 cosmology that Osato-san uses for N-body simulation
+# h = 0.67321
+# Omega_b = 0.049389
+# Omega_cdm = 0.26499
+# Omega_k = 0
+# Omega_fld = 0
+# Omega_scf = 0
+# N_ur = 2.046
+# N_ncdm = 1
+# m_ncdm = 0.06
+# P_k_ini type = analytic_Pk
+# A_s = 2.1005e-09
+# n_s = 0.96605
+# 
+# A part of Class output:
+# non-cold dark matter species with i=1 has m_i = 6.000000e-02 eV (so m_i / omega_i =9.313858e+01 eV)
+# -> Omega_nu = 6.000000e-02 / 9.313858e+01 = 6.441e-04
+# 
+# Cosmological parameters used for dark emulator input:
+# Omega_b * h^2 = 0.049389 * 0.67321^2 = 0.02238367285
+# Omega_cdm * h^2 = 0.26499 * 0.67321^2 = 0.1200965695
+# Omega_Lambda = 1.0 - Omega_m = 1.0 - (Omega_b + Omega_cdm + Omega_nu) = 1.0 - (0.049389 + 0.26499 + 6.441e-04) = 0.6849769
+# ln10p10As = np.log(10**10 * 2.1005e-09) = 3.0447605046213453
+# ns = 0.96605
+# w = -1.0
+
 class Sampler:
     def __init__(self, zbin, use_model=True):
         # Read the data
@@ -28,10 +54,11 @@ class Sampler:
         ## HOD model
         hod = model_hod.darkemu_x_hod()
         ## Cosmological parameters (this is fixed to Planck 2018)
-        cparam = np.array([0.02225,  0.1198 ,  0.6844 ,  3.094  ,  0.9645 , -1.])
+        # cparam = np.array([0.02225,  0.1198 ,  0.6844 ,  3.094  ,  0.9645 , -1.])
+        cparam = np.array([0.02238367285, 0.1200965695, 0.6849769, 3.0447605046213453, 0.96605, -1.0])
         hod.set_cosmology(cparam)
         ## Measurement correction
-        mc = meascorr.wp_meascorr_class({'Om':0.233, 'wde':-1.0})
+        mc = meascorr.wp_meascorr_class({'Om':0.233, 'wde':-1.0}) # Note: Measurement is done in WMAP9 cosmology
         mc.set_param({'Om':1.0-cparam[2], 'wde':cparam[5]})
         self.models = hod, mc
 
@@ -172,5 +199,5 @@ if __name__ == '__main__':
 
     sampler = Sampler(args.zbin)
     output = os.path.join(here, '../chains/{}-z{}-'.format(args.output, args.zbin))
-    sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha', 'kappa'], output)
+    # sampler.sample_with_multinest(prior, ['logMmin', 'sigma_sq', 'logM1', 'alpha', 'kappa'], output)
     sampler.derived_predictions(output+'post_equal_weights.dat')
