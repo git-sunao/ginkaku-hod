@@ -54,8 +54,7 @@ class Sampler:
         ## HOD model
         hod = model_hod.darkemu_x_hod()
         ## Cosmological parameters (this is fixed to Planck 2018)
-        # cparam = np.array([0.02225,  0.1198 ,  0.6844 ,  3.094  ,  0.9645 , -1.])
-        cparam = np.array([0.02238367285, 0.1200965695, 0.6849769, 3.0447605046213453, 0.96605, -1.0])
+        cparam = np.array([0.02238367285, 0.1200965695, 0.6849769, 3.0447605046213453, 0.96605, -1.0]) # Planck2018 cosmology that Osato-san uses
         hod.set_cosmology(cparam)
         ## Measurement correction
         mc = meascorr.wp_meascorr_class({'Om':0.233, 'wde':-1.0}) # Note: Measurement is done in WMAP9 cosmology
